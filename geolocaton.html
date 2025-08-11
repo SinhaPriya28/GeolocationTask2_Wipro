@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #89f7fe, #66a6ff);
+            color: #5141ce;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #222;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #34a037;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .info-box {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            max-width: 400px;
+            margin: 20px auto;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        .info-box p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        iframe {
+            border-radius: 10px;
+            margin-top: 15px;
+            border: none;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>📍 Geolocation Example</h1>
+    <button onclick="getLocation()">Get Current Location</button>
+
+    <div class="info-box">
+        <p id="status">Status: Idle</p>
+        <p>Latitude: <span id="lat">-</span></p>
+        <p>Longitude: <span id="lon">-</span></p>
+        <p>Accuracy (meters): <span id="acc">-</span></p>
+        <p>Timestamp: <span id="ts">-</span></p>
+        <p><a id="maps-link" href="#" target="_blank">🌍 Open in Google Maps</a></p>
+    </div>
+
+    <iframe id="map" width="400" height="300"></iframe>
+    <p id="error"></p>
+
+    <script>
+        function getLocation() {
+            if (!navigator.geolocation) {
+                document.getElementById("error").innerText = "Geolocation is not supported by your browser.";
+                return;
+            }
+            document.getElementById("status").innerText = "Status: Getting location...";
+            navigator.geolocation.getCurrentPosition(success, error, { enableHighAccuracy: true });
+        }
+
+        function success(position) {
+            var lat = position.coords.latitude;
+            var lon = position.coords.longitude;
+            var acc = position.coords.accuracy;
+            var ts = new Date(position.timestamp).toLocaleString();
+
+            document.getElementById("lat").innerText = lat;
+            document.getElementById("lon").innerText = lon;
+            document.getElementById("acc").innerText = acc;
+            document.getElementById("ts").innerText = ts;
+
+            document.getElementById("maps-link").href = `https://www.google.com/maps?q=${lat},${lon}`;
+            document.getElementById("map").src = `https://www.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+
+            document.getElementById("status").innerText = "Status: Location obtained ✅";
+            document.getElementById("error").innerText = "";
+        }
+
+        function error(err) {
+            document.getElementById("error").innerText = "Error: " + err.message;
+            document.getElementById("status").innerText = "Status: Error ❌";
+        }
+    </script>
+</body>
+</html>
