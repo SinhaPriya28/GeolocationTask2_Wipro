@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #89f7fe, #66a6ff);
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #222;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .info-box {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            max-width: 400px;
+            margin: 20px auto;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        .info-box p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        iframe {
+            border-radius: 10px;
+            margin-top: 15px;
+            border: none;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>📍 Geolocation Example</h1>
+    <button onclick="getLocation()">Get Current Location</button>
+    <button onclick="startTracking()">Start Tracking</button>
+    <button onclick="stopTracking()">Stop Tracking</button>
+    <button onclick="copyCoordinates()">Copy Coordinates</button>
+
+    <div class="info-box">
+        <p id="status">Status: Idle</p>
+        <p>Latitude: <span id="lat">-</span></p>
+        <p>Longitude: <span id="lon">-</span></p>
+        <p>Accuracy (meters): <span id="acc">-</span></p>
+        <p>Timestamp: <span id="ts">-</span></p>
+        <p><a id="maps-link" href="#" target="_blank">🌍 Open in Google Maps</a></p>
+    </div>
+
+    <iframe id="map" width="400" height="300"></iframe>
+    <p id="error"></p>
+
+    <script>
+        let watchId = null; // For tracking session
+
+        function updateLocation(position) {
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
+            let acc = position.coords.accuracy;
+            let ts = new Date(position.timestamp).toLocaleString();
+
+            document.getElementById("lat").innerText = lat;
+            document.getElementById("lon").innerText = lon;
+            document.getElementById("acc").innerText = acc;
+            document.getElementById("ts").innerText = ts;
+
+            document.getElementById("maps-link").href = `https://www.google.com/maps?q=${lat},${lon}`;
+            document.getElementById("map").src = `https://www.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+
+            document.getElementById("status").innerText = "Status: Location updated ✅";
+            document.getElementById("error").innerText = "";
+        }
+
+        function getLocation() {
+            if (!navigator.geolocation) {
+                document.getElementById("error").innerText = "Geolocation is not supported by your browser.";
+                return;
+            }
+            document.getElementById("status").innerText = "Status: Getting location...";
+            navigator.geolocation.getCurrentPosition(updateLocation, handleError, { enableHighAccuracy: true });
+        }
+
+        function startTracking() {
+            if (!navigator.geolocation) {
+                document.getElementById("error").innerText = "Geolocation is not supported by your browser.";
+                return;
+            }
+            if (watchId) {
+                document.getElementById("error").innerText = "Tracking is already running.";
+                return;
+            }
+            document.getElementById("status").innerText = "Status: Tracking started...";
+            watchId = navigator.geolocation.watchPosition(updateLocation, handleError, { enableHighAccuracy: true });
+        }
+
+        function stopTracking() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+                document.getElementById("status").innerText = "Status: Tracking stopped 🛑";
+            } else {
+                document.getElementById("error").innerText = "No tracking session to stop.";
+            }
+        }
+
+        function copyCoordinates() {
+            let lat = document.getElementById("lat").innerText;
+            let lon = document.getElementById("lon").innerText;
+            if (lat === "-" || lon === "-") {
+                document.getElementById("error").innerText = "No coordinates to copy.";
+                return;
+            }
+            let coords = `${lat}, ${lon}`;
+            navigator.clipboard.writeText(coords).then(() => {
+                document.getElementById("status").innerText = "Status: Coordinates copied 📋";
+            }).catch(() => {
+                document.getElementById("error").innerText = "Failed to copy coordinates.";
+            });
+        }
+
+        function handleError(err) {
+            document.getElementById("error").innerText = "Error: " + err.message;
+            document.getElementById("status").innerText = "Status: Error ❌";
+        }
+    </script>
+</body>
+</html>
